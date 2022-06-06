@@ -1,8 +1,8 @@
 package com.codepath.apps.restclienttemplate.models;
 
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
+//import androidx.room.ColumnInfo;
+//import androidx.room.Entity;
+//import androidx.room.PrimaryKey;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,14 +15,14 @@ import java.util.List;
  * https://github.com/codepath/android_guides/wiki/Room-Guide
  *
  */
-@Entity
+//@Entity
 public class SampleModel {
 
-	@PrimaryKey(autoGenerate = true)
+//	@PrimaryKey(autoGenerate = true)
 	Long id;
 
 	// Define table fields
-	@ColumnInfo
+//	@ColumnInfo
 	private String name;
 
 	public SampleModel() {

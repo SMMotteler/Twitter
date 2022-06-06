@@ -27,7 +27,7 @@ Open `src/com.codepath.apps.restclienttemplate/RestClient.java`. Configure the `
 For example if I wanted to connect to Twitter:
 
 ```java
-// RestClient.java
+// TwitterClient.java
 public class RestClient extends OAuthBaseClient {
     public static final BaseApi REST_API_INSTANCE = TwitterApi.instance();
     public static final String REST_URL = "https://api.twitter.com/1.1";
@@ -53,7 +53,7 @@ This is used for the OAuth authentication flow for launching the app through web
 Next, you want to define the endpoints which you want to retrieve data from or send data to within your client:
 
 ```java
-// RestClient.java
+// TwitterClient.java
 public void getHomeTimeline(int page, JsonHttpResponseHandler handler) {
   String apiUrl = getApiUrl("statuses/home_timeline.json");
   RequestParams params = new RequestParams();
@@ -66,7 +66,7 @@ Note we are using `getApiUrl` to get the full URL from the relative fragment and
 You can easily send post requests (or put or delete) using a similar approach:
 
 ```java
-// RestClient.java
+// TwitterClient.java
 public void postTweet(String body, JsonHttpResponseHandler handler) {
     String apiUrl = getApiUrl("statuses/update.json");
     RequestParams params = new RequestParams();
