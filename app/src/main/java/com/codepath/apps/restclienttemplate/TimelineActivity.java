@@ -62,6 +62,8 @@ public class TimelineActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getItemId() == R.id.compose_tweet){
             Toast.makeText(this, "Selected Item is Compose Tweet", Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(this, ComposeActivity.class);
+            startActivity(i);
         }
         return true;
     }
