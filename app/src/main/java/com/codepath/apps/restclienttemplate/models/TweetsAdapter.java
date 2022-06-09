@@ -1,6 +1,8 @@
 package com.codepath.apps.restclienttemplate.models;
 
 import android.content.Context;
+import android.media.Image;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +46,18 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         holder.bind(tweet);
     }
 
+    // Clean all elements of the recycler
+    public void clear() {
+        tweets.clear();
+        notifyDataSetChanged();
+    }
+
+    // Add a list of items -- change to type used
+    public void addAll(List<Tweet> list) {
+        tweets.addAll(list);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return tweets.size();
@@ -53,6 +67,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     public class ViewHolder extends RecyclerView.ViewHolder{
 
         ImageView ivProfileImage;
+        ImageView ivTweetPhoto;
         TextView tvBody;
         TextView tvScreenName;
 
@@ -61,13 +76,29 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             ivProfileImage = itemView.findViewById(R.id.ivProfileImage);
             tvBody = itemView.findViewById(R.id.tvBody);
             tvScreenName = itemView.findViewById(R.id.tvScreenName);
+            ivTweetPhoto = itemView.findViewById(R.id.ivTweetPhoto);
+
         }
 
         public void bind(Tweet tweet){
             tvBody.setText(tweet.body);
             tvScreenName.setText(tweet.user.screenName);
             Glide.with(context).load(tweet.user.profileImageUrl).into(ivProfileImage);
+            if(tweet.hasPhoto){
+                ivTweetPhoto.setVisibility(View.VISIBLE);
+                Glide.with(context).load(tweet.imageURL).into(ivTweetPhoto);
+                Log.i("tweets adapter","photo is here "+tweet.imageURL);
+            }
+            else{
+                ivTweetPhoto.setVisibility(View.GONE);
+                Log.i("tweets adapter","photo is not here");
+
+            }
+            //ivTweetPhoto.setVisibility(View.VISIBLE);
+            //Glide.with(context).load(tweet.imageURL).into(ivTweetPhoto);
+
         }
+
     }
 
 }
