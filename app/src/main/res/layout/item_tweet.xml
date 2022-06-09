@@ -35,7 +35,10 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/ivProfileImage"
         app:layout_constraintTop_toBottomOf="@+id/tvScreenName"
-        tools:text="Hello there!" />
+        tools:text="Hello there! youtube.com"
+        android:autoLink="all"
+        android:linksClickable="true"
+        />
 
     <ImageView
         android:id="@+id/ivTweetPhoto"

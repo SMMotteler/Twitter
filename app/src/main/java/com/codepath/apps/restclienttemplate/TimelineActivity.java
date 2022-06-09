@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.apps.restclienttemplate.models.TweetsAdapter;
+import com.codepath.asynchttpclient.RequestParams;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -33,6 +34,7 @@ public class TimelineActivity extends AppCompatActivity {
     public static final String TAG = "TimelineActivity";
     private static final int REQUEST_CODE = 20;
     private SwipeRefreshLayout swipeContainer;
+    private EndlessRecyclerViewScrollListener scrollListener;
 
     TwitterClient client;
     RecyclerView rvTweets;
@@ -52,7 +54,10 @@ public class TimelineActivity extends AppCompatActivity {
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
-                fetchTimelineAsync(0);
+                tweets.clear(); //clear the recyclerview
+                populateHomeTimeline(null);
+                swipeContainer.setRefreshing(false);
+
             }
         });
         // Configure the refreshing colors
@@ -63,17 +68,35 @@ public class TimelineActivity extends AppCompatActivity {
 
             client = TwitterApp.getTwitterClient(this);
 
-        // FInd the recycler view
+        // Find the recycler view
         rvTweets = findViewById(R.id.rvTweets);
         // Init the list of tweets and adapter
         tweets = new ArrayList<>();
         adapter = new TweetsAdapter(this, tweets);
         // Recycler view setup: layout manager and the adapter
-        rvTweets.setLayoutManager(new LinearLayoutManager((this)));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager((this));
+        rvTweets.setLayoutManager(linearLayoutManager);
         rvTweets.setAdapter(adapter);
-        populateHomeTimeline();
+        // passing null because we want the first 25 tweets
+        populateHomeTimeline(null);
+
+        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to the bottom of the list
+                // loadNextDataFromApi(page);
+                Tweet lastTweetBeingDisplayed = tweets.get(tweets.size() - 1);
+                String maxID = lastTweetBeingDisplayed.id;
+                populateHomeTimeline(maxID);
+            }
+        };
+        rvTweets.addOnScrollListener(scrollListener);
     }
-        @Override
+
+
+
+    @Override
         public boolean onCreateOptionsMenu(Menu menu) {
             getMenuInflater().inflate(R.menu.menu_main, menu);
             return true;
@@ -105,8 +128,8 @@ public class TimelineActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
         }
 
-        private void populateHomeTimeline() {
-            client.getHomeTimeline(new JsonHttpResponseHandler() {
+        private void populateHomeTimeline(String maxID) {
+            client.getHomeTimeline(maxID, new JsonHttpResponseHandler() {
                 // if twe
                 @Override
                 public void onSuccess(int statusCode, Headers headers, JSON json) {
@@ -144,35 +167,4 @@ public class TimelineActivity extends AppCompatActivity {
             // finish the previous activity
             finish();
         }
-    public void fetchTimelineAsync (int page) {
-        // Send the network request to fetch the updated data
-        // `client` here is an instance of Android Async HTTP
-        // getHomeTimeline is an example endpoint.
-        client.getHomeTimeline(new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Headers headers, JSON json) {
-                JSONArray jsonArray = json.jsonArray;
-                // Remember to CLEAR OUT old items before appending in the new ones
-                adapter.clear();
-                // ...the data has come back, add new items to your adapter...
-                try {
-                    adapter.addAll(Tweet.fromJsonArray(jsonArray));
-                    Log.i(TAG, "Success");
-
-                } catch (JSONException e) {
-                    Log.e(TAG, "Json exception", e);
-                    e.printStackTrace();
-                }
-                // Now we call setRefreshing(false) to signal refresh has finished
-                swipeContainer.setRefreshing(false);
-
-            }
-
-            @Override
-            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-                Log.d("DEBUG", "Fetch timeline error: " + throwable.toString());
-            }
-
-        });
-    }
 }
