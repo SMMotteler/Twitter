@@ -2,6 +2,7 @@ package com.codepath.apps.restclienttemplate.models;
 
 import android.content.Context;
 import android.media.Image;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,14 +11,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.net.ParseException;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.codepath.apps.restclienttemplate.R;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder>{
+    private static final int SECOND_MILLIS = 1000;
+    private static final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
+    private static final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
+    private static final int DAY_MILLIS = 24 * HOUR_MILLIS;
 
     Context context;
     List<Tweet> tweets;
@@ -70,6 +80,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         ImageView ivTweetPhoto;
         TextView tvBody;
         TextView tvScreenName;
+        TextView tvRelTime;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -77,13 +88,21 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvBody = itemView.findViewById(R.id.tvBody);
             tvScreenName = itemView.findViewById(R.id.tvScreenName);
             ivTweetPhoto = itemView.findViewById(R.id.ivTweetPhoto);
-
+            tvRelTime = itemView.findViewById(R.id.tvRelTime);
         }
 
         public void bind(Tweet tweet){
-            tvBody.setText(tweet.body);
+            if (tweet.body == ""){
+                tvBody.setVisibility(View.GONE);
+            }
+            else{
+                tvBody.setVisibility(View.VISIBLE);
+                tvBody.setText(tweet.body);
+
+            }
             tvScreenName.setText(tweet.user.screenName);
-            Glide.with(context).load(tweet.user.profileImageUrl).into(ivProfileImage);
+            tvRelTime.setText(getRelativeTimeAgo(tweet.createdAt));
+            Glide.with(context).load(tweet.user.profileImageUrl).transform(new CircleCrop()).into(ivProfileImage);
             if(tweet.hasPhoto){
                 ivTweetPhoto.setVisibility(View.VISIBLE);
                 Glide.with(context).load(tweet.imageURL).into(ivTweetPhoto);
@@ -96,9 +115,40 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             }
             //ivTweetPhoto.setVisibility(View.VISIBLE);
             //Glide.with(context).load(tweet.imageURL).into(ivTweetPhoto);
-
         }
 
+    }
+    public String getRelativeTimeAgo(String rawJsonDate) {
+        String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
+        SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
+        sf.setLenient(true);
+
+        try {
+            long time = sf.parse(rawJsonDate).getTime();
+            long now = System.currentTimeMillis();
+
+            final long diff = now - time;
+            if (diff < MINUTE_MILLIS) {
+                return "just now";
+            } else if (diff < 2 * MINUTE_MILLIS) {
+                return "a minute ago";
+            } else if (diff < 50 * MINUTE_MILLIS) {
+                return diff / MINUTE_MILLIS + " m";
+            } else if (diff < 90 * MINUTE_MILLIS) {
+                return "an hour ago";
+            } else if (diff < 24 * HOUR_MILLIS) {
+                return diff / HOUR_MILLIS + " h";
+            } else if (diff < 48 * HOUR_MILLIS) {
+                return "yesterday";
+            } else {
+                return diff / DAY_MILLIS + " d";
+            }
+        } catch (ParseException | java.text.ParseException e) {
+            Log.i("making date", "getRelativeTimeAgo failed");
+            e.printStackTrace();
+        }
+
+        return "";
     }
 
 }

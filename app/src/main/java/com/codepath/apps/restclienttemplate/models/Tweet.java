@@ -20,6 +20,7 @@ public class Tweet {
     public User user;
     public boolean hasPhoto;
     public String imageURL;
+    public int imgWidth, imgHeight;
 
     // empty constructor needed for the Parceler library
     public Tweet(){
@@ -49,7 +50,12 @@ public class Tweet {
             tweet.imageURL = jsonObject.getJSONObject("entities").getJSONArray("media")
                             .getJSONObject(0).getString("media_url");
             tweet.hasPhoto = true;
-
+            tweet.body = tweet.body.replace(jsonObject.getJSONObject("entities").getJSONArray("media")
+                    .getJSONObject(0).getString("url"),"");
+            tweet.imgHeight = jsonObject.getJSONObject("entities").getJSONArray("media")
+                    .getJSONObject(0).getJSONObject("sizes").getJSONObject("large").getInt("h");
+            tweet.imgWidth = jsonObject.getJSONObject("entities").getJSONArray("media")
+                    .getJSONObject(0).getJSONObject("sizes").getJSONObject("large").getInt("w");
         }
 
 
