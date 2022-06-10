@@ -52,7 +52,7 @@ GIF created with [Kap](https://getkap.co/).
 
 ## Notes
 
-Describe any challenges encountered while building the app.
+I attempted to implement a way to see the original retweeted tweets, but I couldn't get it to work. There's still some code in the files that pertains to this functionality, but it doesn't do anything.
 
 ## Open-source libraries used
 
