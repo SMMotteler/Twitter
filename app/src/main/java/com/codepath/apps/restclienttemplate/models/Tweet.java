@@ -19,6 +19,8 @@ public class Tweet {
     public String createdAt;
     public User user;
     public boolean hasPhoto;
+    public boolean retweeted;
+    public User retweeter;
     public String imageURL;
     public String id;
     public int imgWidth, imgHeight;
@@ -28,16 +30,30 @@ public class Tweet {
     }
 
     public static Tweet fromJson(JSONObject jsonObject) throws JSONException {
+        JSONObject theJSON;
         Tweet tweet = new Tweet();
+        theJSON = jsonObject;
         if (jsonObject.has("full_text")){
-            tweet.body = jsonObject.getString("full_text");
+            tweet.body = theJSON.getString("full_text");
         }
         else{
-            tweet.body = jsonObject.getString("text");
+            tweet.body = theJSON.getString("text");
         }
-        tweet.createdAt = jsonObject.getString("created_at");
-        tweet.user = User.fromJson(jsonObject.getJSONObject("user"));
-        tweet.id = jsonObject.getString("id_str");
+        tweet.createdAt = theJSON.getString("created_at");
+        if (jsonObject.getBoolean("retweeted")){
+            Log.d("retweet", jsonObject.getJSONObject("retweeted_status").toString());
+            tweet.retweeted = true;
+            tweet.retweeter = User.fromJson(jsonObject.getJSONObject("user"));
+            theJSON = jsonObject.getJSONObject("retweeted_status");
+            tweet.user = User.fromJson(jsonObject.getJSONObject("retweeted_status").getJSONObject("user"));
+        }
+        else{
+            Log.d("retweet", "not a retweet");
+            tweet.retweeted = false;
+            tweet.retweeter = null;
+            tweet.user = User.fromJson(theJSON.getJSONObject("user"));
+        }
+        tweet.id = theJSON.getString("id_str");
 //        if (jsonObject.getJSONObject("entities").length() > 0){
 //            if (jsonObject.getJSONObject("entities").has("media")){
 //                if (jsonObject.getJSONObject("entities").getJSONArray("media").length() > 0){
@@ -47,22 +63,22 @@ public class Tweet {
 //                }
 //            }
 //        }
-        if (!jsonObject.getJSONObject("entities").has("media")){
+        if (!theJSON.getJSONObject("entities").has("media")){
             Log.d("Tweet", "no image");
             tweet.imageURL = "none";
             tweet.hasPhoto = false;
         }
         else{
             Log.d("Tweet", "cool image: ");
-            tweet.imageURL = jsonObject.getJSONObject("entities").getJSONArray("media")
+            tweet.imageURL = theJSON.getJSONObject("entities").getJSONArray("media")
                             .getJSONObject(0).getString("media_url");
             tweet.hasPhoto = true;
-            tweet.body = tweet.body.replace(jsonObject.getJSONObject("entities").getJSONArray("media")
+            tweet.body = tweet.body.replace(theJSON.getJSONObject("entities").getJSONArray("media")
                     .getJSONObject(0).getString("url"),"");
-            tweet.imgHeight = jsonObject.getJSONObject("entities").getJSONArray("media")
-                    .getJSONObject(0).getJSONObject("sizes").getJSONObject("large").getInt("h");
-            tweet.imgWidth = jsonObject.getJSONObject("entities").getJSONArray("media")
-                    .getJSONObject(0).getJSONObject("sizes").getJSONObject("large").getInt("w");
+            //tweet.imgHeight = jsonObject.getJSONObject("entities").getJSONArray("media")
+            //        .getJSONObject(0).getJSONObject("sizes").getJSONObject("large").getInt("h");
+            //tweet.imgWidth = jsonObject.getJSONObject("entities").getJSONArray("media")
+            //        .getJSONObject(0).getJSONObject("sizes").getJSONObject("large").getInt("w");
         }
 
 

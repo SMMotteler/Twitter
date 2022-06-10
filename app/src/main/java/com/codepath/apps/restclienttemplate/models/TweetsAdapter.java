@@ -105,7 +105,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             Glide.with(context).load(tweet.user.profileImageUrl).transform(new CircleCrop()).into(ivProfileImage);
             if(tweet.hasPhoto){
                 ivTweetPhoto.setVisibility(View.VISIBLE);
-                Glide.with(context).load(tweet.imageURL).into(ivTweetPhoto);
+                Glide.with(context).load(tweet.imageURL).centerCrop().transform(new RoundedCorners(30)).into(ivTweetPhoto);
                 Log.i("tweets adapter","photo is here "+tweet.imageURL);
             }
             else{
@@ -120,13 +120,14 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     }
     public String getRelativeTimeAgo(String rawJsonDate) {
         String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
+        SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
         SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
         sf.setLenient(true);
 
         try {
             long time = sf.parse(rawJsonDate).getTime();
-            long now = System.currentTimeMillis();
-
+            long now = System.currentTimeMillis() + 14*HOUR_MILLIS;
+            Log.d("Time calc", "Current time: "+formatter.format(now)+"; tweeted time: "+formatter.format(time));
             final long diff = now - time;
             if (diff < MINUTE_MILLIS) {
                 return "just now";
