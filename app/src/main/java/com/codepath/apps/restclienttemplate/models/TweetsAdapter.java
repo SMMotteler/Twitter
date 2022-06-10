@@ -1,12 +1,15 @@
 package com.codepath.apps.restclienttemplate.models;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.media.Image;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,12 +21,17 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.codepath.apps.restclienttemplate.R;
+import com.codepath.apps.restclienttemplate.TimelineActivity;
+import com.codepath.apps.restclienttemplate.TweetDetailActivity;
+
+import org.parceler.Parcels;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
 
-public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder>{
+public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder> {
     private static final int SECOND_MILLIS = 1000;
     private static final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
     private static final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
@@ -33,7 +41,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     List<Tweet> tweets;
 
     // Pass in the context and list of tweets
-    public TweetsAdapter(Context context, List<Tweet> tweets){
+    public TweetsAdapter(Context context, List<Tweet> tweets) {
         this.context = context;
         this.tweets = tweets;
     }
@@ -74,13 +82,15 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     }
 
     // Define a viewholder
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         ImageView ivProfileImage;
         ImageView ivTweetPhoto;
         TextView tvBody;
         TextView tvScreenName;
         TextView tvRelTime;
+        ImageButton ibFavorite;
+        TextView tvFavoriteCount;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -89,13 +99,16 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvScreenName = itemView.findViewById(R.id.tvScreenName);
             ivTweetPhoto = itemView.findViewById(R.id.ivTweetPhoto);
             tvRelTime = itemView.findViewById(R.id.tvRelTime);
+            ibFavorite = itemView.findViewById(R.id.ibFavorite);
+            tvFavoriteCount = itemView.findViewById(R.id.tvFavoriteCount);
+
+            itemView.setOnClickListener(this);
         }
 
-        public void bind(Tweet tweet){
-            if (tweet.body == ""){
+        public void bind(Tweet tweet) {
+            if (tweet.body == "") {
                 tvBody.setVisibility(View.GONE);
-            }
-            else{
+            } else {
                 tvBody.setVisibility(View.VISIBLE);
                 tvBody.setText(tweet.body);
 
@@ -103,53 +116,81 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvScreenName.setText(tweet.user.screenName);
             tvRelTime.setText(getRelativeTimeAgo(tweet.createdAt));
             Glide.with(context).load(tweet.user.profileImageUrl).transform(new CircleCrop()).into(ivProfileImage);
-            if(tweet.hasPhoto){
+            if (tweet.hasPhoto) {
                 ivTweetPhoto.setVisibility(View.VISIBLE);
                 Glide.with(context).load(tweet.imageURL).centerCrop().transform(new RoundedCorners(30)).into(ivTweetPhoto);
-                Log.i("tweets adapter","photo is here "+tweet.imageURL);
-            }
-            else{
+                Log.i("tweets adapter", "photo is here " + tweet.imageURL);
+            } else {
                 ivTweetPhoto.setVisibility(View.GONE);
-                Log.i("tweets adapter","photo is not here");
+                Log.i("tweets adapter", "photo is not here");
 
             }
             //ivTweetPhoto.setVisibility(View.VISIBLE);
             //Glide.with(context).load(tweet.imageURL).into(ivTweetPhoto);
+
+            ibFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // if not already Favorited
+                        // tell Twitter that I want to favorite this tweet
+                        // change the drawable to btn_star_big_on
+                        // increment the text inside tvFavoriteCount
+                    // else if already Favorited
+                        // tell Twitter I want to unfavorite this
+                        // change the drawable back to btn_star_big_off
+                        // decrement the text inside tvFavoriteCount
+                }
+            });
         }
 
-    }
-    public String getRelativeTimeAgo(String rawJsonDate) {
-        String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
-        SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
-        SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
-        sf.setLenient(true);
+        @Override
+        public void onClick(View view) {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                Tweet tweet = tweets.get(position);
+                Intent showDetails = new Intent(context, TweetDetailActivity.class);
+                showDetails.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
+                context.startActivity(showDetails);
 
-        try {
-            long time = sf.parse(rawJsonDate).getTime();
-            long now = System.currentTimeMillis() + 14*HOUR_MILLIS;
-            Log.d("Time calc", "Current time: "+formatter.format(now)+"; tweeted time: "+formatter.format(time));
-            final long diff = now - time;
-            if (diff < MINUTE_MILLIS) {
-                return "just now";
-            } else if (diff < 2 * MINUTE_MILLIS) {
-                return "a minute ago";
-            } else if (diff < 50 * MINUTE_MILLIS) {
-                return diff / MINUTE_MILLIS + " m";
-            } else if (diff < 90 * MINUTE_MILLIS) {
-                return "an hour ago";
-            } else if (diff < 24 * HOUR_MILLIS) {
-                return diff / HOUR_MILLIS + " h";
-            } else if (diff < 48 * HOUR_MILLIS) {
-                return "yesterday";
-            } else {
-                return diff / DAY_MILLIS + " d";
             }
-        } catch (ParseException | java.text.ParseException e) {
-            Log.i("making date", "getRelativeTimeAgo failed");
-            e.printStackTrace();
         }
 
-        return "";
-    }
+        public String getRelativeTimeAgo(String rawJsonDate) {
+            String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
+            SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
+            sf.setLenient(true);
 
+            try {
+                long time = sf.parse(rawJsonDate).getTime();
+                // the time of my system is off, so I adjusted it so that it displays correctly
+                long now = System.currentTimeMillis() + 14 * HOUR_MILLIS + 42 * MINUTE_MILLIS;
+                Log.d("Time calc", "Current time: " + formatter.format(now) + "; tweeted time: " + formatter.format(time));
+                final long diff = now - time;
+                if (diff < MINUTE_MILLIS) {
+                    return "just now";
+                } else if (diff < 2 * MINUTE_MILLIS) {
+                    return "a minute ago";
+                } else if (diff < 50 * MINUTE_MILLIS) {
+                    return diff / MINUTE_MILLIS + " m";
+                } else if (diff < 90 * MINUTE_MILLIS) {
+                    return "an hour ago";
+                } else if (diff < 24 * HOUR_MILLIS) {
+                    return diff / HOUR_MILLIS + " h";
+                } else if (diff < 48 * HOUR_MILLIS) {
+                    return "yesterday";
+                } else {
+                    return diff / DAY_MILLIS + " d";
+                }
+            } catch (ParseException | java.text.ParseException e) {
+                Log.i("making date", "getRelativeTimeAgo failed");
+                e.printStackTrace();
+            }
+
+            return "";
+        }
+
+    }
 }
+
+
