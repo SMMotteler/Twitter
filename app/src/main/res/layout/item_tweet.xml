@@ -97,4 +97,54 @@
         app:layout_constraintTop_toBottomOf="@id/ivTweetPhoto"
         app:srcCompat="@android:drawable/btn_star_big_off" />
 
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="87dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toTopOf="@+id/tvBody"
+        app:layout_constraintEnd_toStartOf="@+id/tvRelTime"
+        app:layout_constraintHorizontal_bias="0.053"
+        app:layout_constraintStart_toEndOf="@+id/tvScreenName"
+        app:layout_constraintTop_toBottomOf="@id/divider"
+        app:layout_constraintVertical_bias="1.0"
+        tools:text="ben" />
+
+    <ImageButton
+        android:id="@+id/ibComment"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tvFavoriteCount"
+        app:layout_constraintTop_toBottomOf="@id/ivTweetPhoto"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@android:drawable/sym_action_chat" />
+
+    <ImageButton
+        android:id="@+id/ibRetweet"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ibComment"
+        app:layout_constraintTop_toBottomOf="@id/ivTweetPhoto"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@android:drawable/button_onoff_indicator_off" />
+
+    <TextView
+        android:id="@+id/tvRetweetCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        app:layout_constraintStart_toEndOf="@+id/ibRetweet"
+        app:layout_constraintTop_toTopOf="@+id/ibRetweet" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

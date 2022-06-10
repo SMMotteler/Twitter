@@ -93,25 +93,52 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         ImageView ivProfileImage;
         ImageView ivTweetPhoto;
         TextView tvBody;
+        TextView tvName;
         TextView tvScreenName;
         TextView tvRelTime;
         ImageButton ibFavorite;
+        ImageButton ibComment;
         TextView tvFavoriteCount;
+        ImageButton ibRetweet;
+        TextView tvRetweetCount;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivProfileImage = itemView.findViewById(R.id.ivProfileImage);
             tvBody = itemView.findViewById(R.id.tvBody);
             tvScreenName = itemView.findViewById(R.id.tvScreenName);
+            tvName = itemView.findViewById(R.id.tvName);
             ivTweetPhoto = itemView.findViewById(R.id.ivTweetPhoto);
             tvRelTime = itemView.findViewById(R.id.tvRelTime);
             ibFavorite = itemView.findViewById(R.id.ibFavorite);
             tvFavoriteCount = itemView.findViewById(R.id.tvFavoriteCount);
+            ibComment = itemView.findViewById(R.id.ibComment);
+            ibRetweet = itemView.findViewById(R.id.ibRetweet);
+            tvRetweetCount = itemView.findViewById(R.id.tvRetweetCount);
 
             itemView.setOnClickListener(this);
         }
 
         public void bind(Tweet tweet) {
+            if (tweet.isFavorited){
+                Drawable newImage = context.getDrawable(android.R.drawable.btn_star_big_on);
+                ibFavorite.setImageDrawable(newImage);
+            }
+            else{
+                Drawable newImage = context.getDrawable(android.R.drawable.btn_star_big_off);
+                ibFavorite.setImageDrawable(newImage);
+
+            }
+
+            if (tweet.isRetweeted){
+                Drawable newImage = context.getDrawable(android.R.drawable.button_onoff_indicator_on);
+                ibRetweet.setImageDrawable(newImage);
+            }
+            else {
+                Drawable newImage = context.getDrawable(android.R.drawable.button_onoff_indicator_off);
+                ibRetweet.setImageDrawable(newImage);
+
+            }
             if (tweet.body == "") {
                 tvBody.setVisibility(View.GONE);
             } else {
@@ -119,7 +146,8 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                 tvBody.setText(tweet.body);
 
             }
-            tvScreenName.setText(tweet.user.screenName);
+            tvName.setText("@"+tweet.user.screenName);
+            tvScreenName.setText(tweet.user.name);
             tvRelTime.setText(getRelativeTimeAgo(tweet.createdAt));
             Glide.with(context).load(tweet.user.profileImageUrl).transform(new CircleCrop()).into(ivProfileImage);
             if (tweet.hasPhoto) {
@@ -134,6 +162,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             //ivTweetPhoto.setVisibility(View.VISIBLE);
             //Glide.with(context).load(tweet.imageURL).into(ivTweetPhoto);
             tvFavoriteCount.setText(String.valueOf(tweet.favoriteCount));
+            tvRetweetCount.setText(String.valueOf(tweet.retweetedCount));
 
             ibFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -186,6 +215,62 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                         tvFavoriteCount.setText(String.valueOf(tweet.favoriteCount));
                 }}
             });
+            ibComment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    }
+            });
+            ibRetweet.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // if not already Favorited
+                    if(!tweet.isRetweeted){
+                        // Hard: tell Twitter that I want to retweet this tweet
+                        tweet.isRetweeted = true;
+                        TwitterApp.getTwitterClient(context).retweet(tweet.id, new JsonHttpResponseHandler() {
+                            @Override
+                            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                                Log.i("adapter", "retweeted");
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                                Log.e("adapter", "oops");
+
+                            }
+                        });
+                        // easy: change the drawable to button_onoff_indicator_on
+                        Drawable newImage = context.getDrawable(android.R.drawable.button_onoff_indicator_on);
+                        ibRetweet.setImageDrawable(newImage);
+                        // med: increment the text inside tvFavoriteCount
+                        tweet.retweetedCount++;
+                        tvRetweetCount.setText(String.valueOf(tweet.retweetedCount));
+                    }
+                    else{
+                        // else if already Favorited
+                        // tell Twitter I want to unfavorite this
+                        tweet.isRetweeted = false;
+                        TwitterApp.getTwitterClient(context).unretweet(tweet.id, new JsonHttpResponseHandler() {
+                            @Override
+                            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                                Log.i("adapter", "unretweeted");
+
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                                Log.e("adapter", "oops");
+
+                            }
+                        });
+                        // change the drawable back to button_onoff_indicator_off
+                        Drawable newImage = context.getDrawable(android.R.drawable.button_onoff_indicator_off);
+                        ibRetweet.setImageDrawable(newImage);
+                        // decrement the text inside tvFavoriteCount
+                        tweet.retweetedCount--;
+                        tvRetweetCount.setText(String.valueOf(tweet.retweetedCount));
+                    }}
+            });
         }
 
         @Override
@@ -202,7 +287,6 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
 
         public String getRelativeTimeAgo(String rawJsonDate) {
             String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
             SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
             sf.setLenient(true);
 
@@ -210,7 +294,6 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                 long time = sf.parse(rawJsonDate).getTime();
                 // the time of my system is off, so I adjusted it so that it displays correctly
                 long now = System.currentTimeMillis() + 14 * HOUR_MILLIS + 42 * MINUTE_MILLIS;
-                Log.d("Time calc", "Current time: " + formatter.format(now) + "; tweeted time: " + formatter.format(time));
                 final long diff = now - time;
                 if (diff < MINUTE_MILLIS) {
                     return "just now";

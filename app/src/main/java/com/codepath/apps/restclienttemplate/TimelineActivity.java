@@ -136,7 +136,13 @@ public class TimelineActivity extends AppCompatActivity {
                     Log.i(TAG, "onSuccess! " + json.toString());
                     JSONArray jsonArray = json.jsonArray;
                     try {
+                        // removes the last element in the list if it's not the first call -
+                        // the getHomeTimeline retrieves a duplicate
+                        if (maxID != null){
+                        tweets.remove(tweets.size() - 1);
+                        }
                         tweets.addAll(Tweet.fromJsonArray(jsonArray));
+
                         adapter.notifyDataSetChanged();
                     } catch (JSONException e) {
                         Log.e(TAG, "Json exception", e);
