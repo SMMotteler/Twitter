@@ -8,9 +8,11 @@
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeContainer"
-        android:layout_width="414dp"
-        android:layout_height="732dp"
-        tools:layout_editor_absoluteX="-3dp">
+        android:layout_width="412dp"
+        android:layout_height="657dp"
+        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
 
         <androidx.recyclerview.widget.RecyclerView
