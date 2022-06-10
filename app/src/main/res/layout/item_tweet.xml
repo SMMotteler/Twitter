@@ -88,6 +88,14 @@
         app:layout_constraintStart_toEndOf="@+id/ibFavorite"
         app:layout_constraintTop_toTopOf="@+id/ibFavorite" />
 
+    <TextView
+        android:id="@+id/tvCommentCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/ibComment"
+        app:layout_constraintTop_toBottomOf="@+id/ivTweetPhoto"
+        tools:text="0" />
+
     <ImageButton
         android:id="@+id/ibFavorite"
         android:layout_width="30dp"
@@ -134,7 +142,7 @@
         android:layout_height="30dp"
         android:layout_marginStart="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/ibComment"
+        app:layout_constraintStart_toEndOf="@+id/tvCommentCount"
         app:layout_constraintTop_toBottomOf="@id/ivTweetPhoto"
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@android:drawable/button_onoff_indicator_off" />
@@ -143,8 +151,8 @@
         android:id="@+id/tvRetweetCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0"
         app:layout_constraintStart_toEndOf="@+id/ibRetweet"
-        app:layout_constraintTop_toTopOf="@+id/ibRetweet" />
+        app:layout_constraintTop_toTopOf="@+id/ibRetweet"
+        tools:text="0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

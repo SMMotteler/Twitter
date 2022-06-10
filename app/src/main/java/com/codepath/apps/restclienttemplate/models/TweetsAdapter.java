@@ -1,5 +1,6 @@
 package com.codepath.apps.restclienttemplate.models;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.codepath.apps.restclienttemplate.ComposeActivity;
 import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TimelineActivity;
 import com.codepath.apps.restclienttemplate.TweetDetailActivity;
@@ -98,6 +100,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         TextView tvRelTime;
         ImageButton ibFavorite;
         ImageButton ibComment;
+        TextView tvCommentCount;
         TextView tvFavoriteCount;
         ImageButton ibRetweet;
         TextView tvRetweetCount;
@@ -113,6 +116,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             ibFavorite = itemView.findViewById(R.id.ibFavorite);
             tvFavoriteCount = itemView.findViewById(R.id.tvFavoriteCount);
             ibComment = itemView.findViewById(R.id.ibComment);
+            //tvCommentCount = itemView.findViewById((R.id.tvCommentCount));
             ibRetweet = itemView.findViewById(R.id.ibRetweet);
             tvRetweetCount = itemView.findViewById(R.id.tvRetweetCount);
 
@@ -163,6 +167,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             //Glide.with(context).load(tweet.imageURL).into(ivTweetPhoto);
             tvFavoriteCount.setText(String.valueOf(tweet.favoriteCount));
             tvRetweetCount.setText(String.valueOf(tweet.retweetedCount));
+            //tvCommentCount.setText(String.valueOf(tweet.commentCount));
 
             ibFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -213,13 +218,26 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                         // decrement the text inside tvFavoriteCount
                         tweet.favoriteCount--;
                         tvFavoriteCount.setText(String.valueOf(tweet.favoriteCount));
-                }}
+                }
+                    notifyDataSetChanged();
+                }
             });
+
             ibComment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    // pop up a compose screen - not a brand new tweet though,
+                    // will have an extra attribute: "in_reply_to_status_id"
+                    Intent i = new Intent(context, ComposeActivity.class);
+                    i.putExtra("tweet_to_reply_to", Parcels.wrap(tweet));
+                    // context.startActivity(i);
+                    ((Activity) context).startActivityForResult(i, TimelineActivity.REQUEST_CODE);
+                    //tweet.commentCount++;
+                    //tvCommentCount.setText(String.valueOf(tweet.commentCount));
+
                     }
             });
+
             ibRetweet.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -235,7 +253,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
 
                             @Override
                             public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-                                Log.e("adapter", "oops");
+                                Log.e("adapter for retweet", "oops");
 
                             }
                         });
@@ -269,7 +287,8 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                         // decrement the text inside tvFavoriteCount
                         tweet.retweetedCount--;
                         tvRetweetCount.setText(String.valueOf(tweet.retweetedCount));
-                    }}
+                    }
+                    notifyDataSetChanged();}
             });
         }
 

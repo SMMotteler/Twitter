@@ -32,7 +32,7 @@ import okhttp3.Headers;
 public class TimelineActivity extends AppCompatActivity {
 
     public static final String TAG = "TimelineActivity";
-    private static final int REQUEST_CODE = 20;
+    public static final int REQUEST_CODE = 20;
     private SwipeRefreshLayout swipeContainer;
     private EndlessRecyclerViewScrollListener scrollListener;
 
@@ -105,7 +105,6 @@ public class TimelineActivity extends AppCompatActivity {
         @Override
         public boolean onOptionsItemSelected(@NonNull MenuItem item) {
             if(item.getItemId() == R.id.compose_tweet){
-                Toast.makeText(this, "Selected Item is Compose Tweet", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(this, ComposeActivity.class);
                 startActivityForResult(i, REQUEST_CODE);
             }

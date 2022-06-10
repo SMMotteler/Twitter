@@ -28,6 +28,31 @@ public class ComposeActivity extends AppCompatActivity {
     Button btnTweet;
 
     TwitterClient client;
+    JsonHttpResponseHandler handler = new JsonHttpResponseHandler() {
+        @Override
+        public void onSuccess(int statusCode, Headers headers, JsonHttpResponseHandler.JSON
+        json) {
+            Log.i(TAG, "onSuccess to publish tweet");
+            try {
+                Tweet tweet = Tweet.fromJson((json.jsonObject));
+                Log.i(TAG, "Published tweet says: "+tweet.body);
+                Intent i = new Intent();
+                i.putExtra("tweet", Parcels.wrap(tweet));
+                // set result code and bundle data for response
+                setResult(RESULT_OK, i);
+                // close the activity and pass data to the parent
+                finish();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+            Log.e(TAG, "onFailure to reply to tweet", throwable);
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,30 +73,16 @@ public class ComposeActivity extends AppCompatActivity {
                     Toast.makeText(ComposeActivity.this, "Tweet is over by "+(tweetText.length()-280)+" characters.", Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    Toast.makeText(ComposeActivity.this, tweetText, Toast.LENGTH_SHORT).show();
-                    client.publishTweet(tweetText, new JsonHttpResponseHandler() {
-                        @Override
-                        public void onSuccess(int statusCode, Headers headers, JSON json) {
-                            Log.i(TAG, "onSuccess to publish tweet");
-                            try {
-                                Tweet tweet = Tweet.fromJson((json.jsonObject));
-                                Log.i(TAG, "Published tweet says: "+tweet.body);
-                                Intent i = new Intent();
-                                i.putExtra("tweet", Parcels.wrap(tweet));
-                                // set result code and bundle data for response
-                                setResult(RESULT_OK, i);
-                                // close the activity and pass data to the parent
-                                finish();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                    // Toast.makeText(ComposeActivity.this, tweetText, Toast.LENGTH_SHORT).show();
 
-                        @Override
-                        public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-                            Log.e(TAG, "onFailure to publish tweet", throwable);
-                        }
-                    });
+                    if(getIntent().hasExtra("tweet_to_reply_to")){
+                        Tweet tweet = Parcels.unwrap(getIntent().getParcelableExtra("tweet_to_reply_to"));
+                        client.replyToTweet(tweet.id,"@"+tweet.user.screenName+" "+tweetText, handler);
+                    }
+
+                    else{
+                    client.publishTweet(tweetText, handler);
+                    }
                 }
             }
         });

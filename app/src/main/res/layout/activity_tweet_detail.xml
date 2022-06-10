@@ -68,14 +68,15 @@
         android:id="@+id/tvRelTime"
         android:layout_width="158dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="4dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textAlignment="textEnd"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textSize="11sp"
         android:textStyle="italic"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ivTweetPhoto"
         tools:text="10 minutes ago" />
 
@@ -87,6 +88,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/tvFavoriteCount"
         android:layout_width="wrap_content"
@@ -99,10 +101,11 @@
         android:id="@+id/ibFavorite"
         android:layout_width="30dp"
         android:layout_height="30dp"
+        android:layout_marginStart="32dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/ivProfileImage"
-        app:layout_constraintTop_toBottomOf="@id/ivTweetPhoto"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvRelTime"
         app:srcCompat="@android:drawable/btn_star_big_off" />
 
     <TextView
@@ -127,10 +130,8 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginStart="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/tvFavoriteCount"
-        app:layout_constraintTop_toBottomOf="@id/ivTweetPhoto"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@+id/tvRelTime"
         app:srcCompat="@android:drawable/sym_action_chat" />
 
     <ImageButton
@@ -138,10 +139,8 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginStart="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/ibComment"
-        app:layout_constraintTop_toBottomOf="@id/ivTweetPhoto"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/tvCommentCount"
+        app:layout_constraintTop_toBottomOf="@+id/tvRelTime"
         app:srcCompat="@android:drawable/button_onoff_indicator_off" />
 
     <TextView
@@ -151,4 +150,12 @@
         android:text="0"
         app:layout_constraintStart_toEndOf="@+id/ibRetweet"
         app:layout_constraintTop_toTopOf="@+id/ibRetweet" />
+
+    <TextView
+        android:id="@+id/tvCommentCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/ibComment"
+        app:layout_constraintTop_toTopOf="@+id/ibComment"
+        tools:text="0" />
 </androidx.constraintlayout.widget.ConstraintLayout>

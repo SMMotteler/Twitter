@@ -3,6 +3,8 @@ package com.codepath.apps.restclienttemplate;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.net.ParseException;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,6 +38,7 @@ public class TweetDetailActivity extends AppCompatActivity {
     ImageButton ibFavorite;
     TextView tvFavoriteCount;
     ImageButton ibComment;
+    TextView tvCommentCount;
     ImageButton ibRetweet;
     TextView tvRetweetCount;
 
@@ -54,6 +57,7 @@ public class TweetDetailActivity extends AppCompatActivity {
         ibFavorite = findViewById(R.id.ibFavorite);
         tvFavoriteCount = findViewById(R.id.tvFavoriteCount);
         ibComment = findViewById(R.id.ibComment);
+        //tvCommentCount = findViewById(R.id.tvCommentCount);
         ibRetweet = findViewById(R.id.ibRetweet);
         tvRetweetCount = findViewById(R.id.tvRetweetCount);
 
@@ -113,6 +117,8 @@ public class TweetDetailActivity extends AppCompatActivity {
         //Glide.with(context).load(tweet.imageURL).into(ivTweetPhoto);
         tvFavoriteCount.setText(String.valueOf(tweet.favoriteCount));
         tvRetweetCount.setText(String.valueOf(tweet.retweetedCount));
+        //tvCommentCount.setText(String.valueOf(tweet.commentCount));
+
         ibFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -162,13 +168,25 @@ public class TweetDetailActivity extends AppCompatActivity {
                     // decrement the text inside tvFavoriteCount
                     tweet.favoriteCount--;
                     tvFavoriteCount.setText(String.valueOf(tweet.favoriteCount));
-                }}
+                }
+            }
         });
+
         ibComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // pop up a compose screen - not a brand new tweet though,
+                // will have an extra attribute: "in_reply_to_status_id"
+                Intent i = new Intent(TweetDetailActivity.this, ComposeActivity.class);
+                i.putExtra("tweet_to_reply_to", Parcels.wrap(tweet));
+                // context.startActivity(i);
+                ((Activity) TweetDetailActivity.this).startActivityForResult(i, TimelineActivity.REQUEST_CODE);
+                //tweet.commentCount++;
+                //tvCommentCount.setText(String.valueOf(tweet.commentCount));
+
             }
         });
+
         ibRetweet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -235,8 +253,7 @@ public class TweetDetailActivity extends AppCompatActivity {
 
         try {
             long time = sf.parse(rawJsonDate).getTime();
-            // the time of my system is off, so I adjusted it so that it displays correctly
-            long now = System.currentTimeMillis() + 14 * HOUR_MILLIS + 42 * MINUTE_MILLIS;
+            long now = System.currentTimeMillis();
             Log.d("Time calc", "Current time: " + formatter.format(now) + "; tweeted time: " + formatter.format(time));
             final long diff = now - time;
             if (diff < MINUTE_MILLIS) {
